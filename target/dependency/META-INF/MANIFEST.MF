@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven 3.6.1
+Built-By: ayancovich
+Build-Jdk: 12.0.1
+Implementation-Title: discovery
+Implementation-Version: 1.0.0
+Implementation-Vendor-Id: com.endava
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-boot
+ -starter-parent/discovery
+Main-Class: org.springframework.boot.loader.JarLauncher
+Start-Class: com.endava.DiscoveryApplication
+Spring-Boot-Version: 2.0.6.RELEASE
+Spring-Boot-Classes: BOOT-INF/classes/
+Spring-Boot-Lib: BOOT-INF/lib/
+

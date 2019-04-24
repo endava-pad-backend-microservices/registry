@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  gateway: 
+    build: ../gateway/   
+    depends_on:
+      - discovery
+    ports:
+        - '8080:8080'
+      
+  discovery: 
+     build: .
+     ports:
+         - '8761:8761'
+         
+#  hello:  
+#    build: ../hello/   
+#    depends_on:
+#      - discovery
+#      - gateway
+#    ports:
+#        - '8081:8081'
+    
