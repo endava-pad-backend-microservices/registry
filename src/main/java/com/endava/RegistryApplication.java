@@ -9,10 +9,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @SpringBootApplication
 @EnableEurekaServer
-public class DiscoveryApplication {
+public class RegistryApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DiscoveryApplication.class, args);
+		SpringApplication.run(RegistryApplication.class, args);
 
 	}
 	
