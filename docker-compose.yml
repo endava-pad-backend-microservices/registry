@@ -1,0 +1,9 @@
+#################################
+####  Registry Microservice  ####
+#################################
+version: '2'
+services:
+  pad_b_registry:
+    image: "${DOCKER_REGISTRY}/pad_b_registry:${PAD_B_REGISTRY_DOCKER_TAG}"
+    ports:
+        - "${PAD_B_REGISTRY_SERVER_PORT}:${PAD_B_REGISTRY_SERVER_PORT}"
