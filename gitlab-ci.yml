@@ -1,0 +1,119 @@
+variables:
+  ARTIFACT_NAME: "pad_b_registry"
+  INTRANET_DIR: "/var/intranet"
+  COMPOSE_FILE: "docker-compose.pad_b_registry.yml"
+  
+stages:
+  - test
+  - build
+  - publish
+  - deploy
+  
+## Build and test job template
+.test_template: &test-buid-job
+  stage: test
+  tags:
+    - maven
+    - java
+  script:
+    - mvn clean package -B
+    
+## Runs application tests for branches
+test-branch:
+  <<: *test-buid-job
+  only:
+    - branches
+  except:
+    - master
+    - /^RC-.*$/
+    
+## Builds and runs application tests for master
+test-build-master:
+  <<: *test-buid-job
+  artifacts:
+    paths:
+      - target/$ARTIFACT_NAME.jar
+  only:
+    - master
+    - /^RC-.*$/
+    
+## Build docker image template
+.build-docker-image_template: &buid-docker-job
+  stage: build
+  tags:
+    - shell
+    
+## Build docker image for master
+build-docker-image-dev:
+  <<: *buid-docker-job
+  script:
+    - docker build -t $DOCKER_REGISTRY/$ARTIFACT_NAME:latest .
+  only:
+    - master
+  except:
+    - tags
+    
+## Build docker image for RC
+build-docker-image-RC:
+  <<: *buid-docker-job
+  script:
+    - docker build -t $DOCKER_REGISTRY/$ARTIFACT_NAME:$CI_BUILD_REF_NAME .
+  only:
+    - /^RC-.*$/
+  except:
+    - tags
+  environment: UAT
+  
+## Docker image publish template
+.publish-docker-image_template: &publish-docker-image-job
+  stage: publish
+  tags:
+    - shell
+    
+## Publish latest
+publish-latest-image:
+  <<: *publish-docker-image-job
+  script:
+    - docker push $DOCKER_REGISTRY/$ARTIFACT_NAME:latest
+  only:
+    - master
+  except:
+    - tags
+  environment: DEV
+  
+## Publish version
+publish-RC-image:
+  <<: *publish-docker-image-job
+  script:
+    - docker push $DOCKER_REGISTRY/$ARTIFACT_NAME:$CI_BUILD_REF_NAME
+  only:
+    - /^RC-.*$/
+  except:
+    - tags
+  environment: UAT
+  
+## Deploy docker container
+.deploy-docker-container_template: &deploy-docker-container-job
+  stage: deploy
+  tags:
+    - shell
+    
+## Deploy latest to DEV INTEGRATION
+deploy-to-dev:
+  <<: *deploy-docker-container-job
+  script:
+    - $DEPLOY_SCRIPT $DEV_INT_SERVER $COMPOSE_FILE $(readlink -f docker-compose.yml) AUTH_DOCKER_TAG latest
+  only:
+    - master
+  environment: DEV
+  
+## Deploy Release candidate to UAT
+deploy-to-uat:
+  <<: *deploy-docker-container-job
+  script:
+    - $DEPLOY_SCRIPT $UAT_SERVER $COMPOSE_FILE $(readlink -f docker-compose.yml) AUTH_DOCKER_TAG $CI_BUILD_REF_NAME
+  only:
+    - /^RC-.*$/
+  except:
+    - tags
+  environment: UAT
