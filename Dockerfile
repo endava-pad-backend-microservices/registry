@@ -1,6 +1,6 @@
 FROM maven:3.6.1-jdk-12 AS Builder
 COPY ./ .
-CMD mvn clean package
+RUN mvn clean package
 
 
 FROM openjdk:12 as Target
